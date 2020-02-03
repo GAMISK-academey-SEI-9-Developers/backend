@@ -10,8 +10,12 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true
   },
-  token: String
-}, {
+  token: String,
+  tripDate:[{type:Date}]
+  
+ 
+},
+ {
   timestamps: true,
   toObject: {
     // remove `hashedPassword` field when we call `.toObject`
