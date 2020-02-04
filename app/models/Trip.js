@@ -45,3 +45,4 @@ TripSchema.pre("save",function(next){
 const Trip=mongoose.model('Trip',TripSchema)
 
 module.exports =Trip
+  
