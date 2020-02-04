@@ -47,9 +47,11 @@ router.get('/trips', requireToken, (req, res, next) => {
 // SHOW
 // GET /examples/5a7db6c74d55bc51bdf39793
 router.get('/trips/:id', requireToken, (req, res, next) => {
+  
   // req.params.id will be set based on the `:id` in the route
   Trip.findById(req.params.id)
-    .then(handle404)
+    .populate("Passengers")
+    .populate("waitingPassengers")
     // if `findById` is succesful, respond with 200 and "example" JSON
     .then(trip => {
       // pass the `req` object and the Mongoose record to `requireOwnership`
@@ -164,7 +166,8 @@ router.put('/trips/:id/passengers', requireToken, (req, res, next) => {
       let newArray =trip._doc.Passengers.filter(id=>{
           String(id)!=req.body.id})
         console.log(newArray)
-         trip.update({Passengers:newArray})
+
+         trip.update({Passengers:newArray,abailable_seates:trip._doc.abailable_seates-1})
         .then(updated=>{console.log('hell yah')})
         res.status(200).json({trip})
       })
@@ -172,25 +175,27 @@ router.put('/trips/:id/passengers', requireToken, (req, res, next) => {
       .catch(next)
   })
 
-  router.put('/trips/:id/waitingPassengers', requireToken, (req, res, next) => {
+  router.put('/trips/:id/WaitingPassengers', requireToken, (req, res, next) => {
+    console.log('helloe')
     // req.params.id will be set based on the `:id` in the route
     Trip.findById(req.params.id)
       // if `findById` is succesful, respond with 200 and "example" JSON
       .then(trip => {
         // pass the `req` object and the Mongoose record to `requireOwnership`
         // it will throw an error if the current user isn't the owner
-        if(!trip._doc.waitingPassengers.some(id=>{return String(id)==(req.user._id)})){
-          if(!trip._doc.Passengers.some(id =>{return String(id) ==req.user._id})){
+        if(!trip._doc.waitingPassengers.some(id=>{return String(id)==(req.body.user._id)})){
+          if(!trip._doc.Passengers.some(id =>{return String(id) ==req.body.user._id})){
           if(String(trip._doc.owner)!=req.user._id){
-            if(!req.user.tripDate.some(date=> trip._doc.date==date)){
+            if(!req.body.user.tripDate.some(date=> trip._doc.date==date)){
+              if(trip._doc.abailable_seates!=0){
         Trip.update({
           _id:req.params.id
         },{
-          $push: { waitingPassengers: req.user._id}
+          $push: { waitingPassengers: req.body.user._id}
         })
         
         .then(() => res.sendStatus(204))
-        }
+            }else{res.status(400).json({error:'no availabe seats'})}}
         else{res.status(400).json({error:'you have another trip at the same time pleas check your trips'})}
       }
         else{res.status(400).json({error:'you are the Driver you cannot be a passenger of the same trip'})}
