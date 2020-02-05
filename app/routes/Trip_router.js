@@ -54,6 +54,7 @@ router.get('/trips/:id', requireToken, (req, res, next) => {
     .populate("waitingPassengers")
     // if `findById` is succesful, respond with 200 and "example" JSON
     .then(trip => {
+     
       // pass the `req` object and the Mongoose record to `requireOwnership`
       // it will throw an error if the current user isn't the owner
      
@@ -143,7 +144,7 @@ router.put('/trips/:id/passengers', requireToken, (req, res, next) => {
       .then(trip => {
         requireOwnership(req, trip)
           let newArray =trip._doc.waitingPassengers.filter(id=>{
-          String(id)!=req.body.id})
+          String(id)!= req.body.id})
         
        let passengers =  trip._doc.Passengers.concat(req.body.id)
         
