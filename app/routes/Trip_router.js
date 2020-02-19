@@ -33,7 +33,7 @@ router.get('/trips', requireToken, (req, res, next) => {
   
   // Option 1 get user's examples
   Trip.find({})
-    .then(trips => res.status(200).json({trips: trips}))
+    .then(trips =>{ res.status(200).json({trips: trips})})
     .catch(next)
   
   // // Option 2 get user's examples
@@ -148,7 +148,7 @@ router.put('/trips/:id/passengers', requireToken, (req, res, next) => {
         
        let passengers =  trip._doc.Passengers.concat(req.body.id)
         
-         trip.update({Passengers:passengers,waitingPassengers:newArray})
+         trip.update({Passengers:passengers,waitingPassengers:newArray,abailable_seates:trip._doc.abailable_seates-1})
         .then(updated=>{console.log('hell yah')})
         res.status(200).json({trip})
       })
@@ -168,7 +168,7 @@ router.put('/trips/:id/passengers', requireToken, (req, res, next) => {
           String(id)!=req.body.id})
         console.log(newArray)
 
-         trip.update({Passengers:newArray,abailable_seates:trip._doc.abailable_seates-1})
+         trip.update({Passengers:newArray,abailable_seates:trip._doc.abailable_seates+1})
         .then(updated=>{console.log('hell yah')})
         res.status(200).json({trip})
       })
